@@ -24,6 +24,7 @@ import React from "react";
 import Request from "superagent";
 import { Button, Form, FormControl, InputGroup, Pagination, Table } from "react-bootstrap";
 import EnUs from "./lang/EnUs";
+import PtBr from "./lang/PtBr";
 import { jsx as _jsx2 } from "react/jsx-runtime";
 
 var ActionTable = /*#__PURE__*/function (_React$Component) {
@@ -474,4 +475,8 @@ _defineProperty(ActionTable, "normalize", function () {
   };
 });
 
+export { EnUs };
+export { PtBr };
+ActionTable.EnUs = EnUs;
+ActionTable.PtBr = PtBr;
 export default ActionTable;

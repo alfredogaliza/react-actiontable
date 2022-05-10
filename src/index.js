@@ -4,6 +4,7 @@ import React from "react";
 import Request from "superagent";
 import { Button, Form, FormControl, InputGroup, Pagination, Table } from "react-bootstrap";
 import EnUs from "./lang/EnUs";
+import PtBr from "./lang/PtBr";
 
 class ActionTable extends React.Component {
 
@@ -315,5 +316,11 @@ class ActionTable extends React.Component {
         );
     }
 }
+
+export {EnUs as EnUs};
+export {PtBr as PtBr};
+
+ActionTable.EnUs = EnUs;
+ActionTable.PtBr = PtBr;
 
 export default ActionTable;
