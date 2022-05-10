@@ -10,7 +10,7 @@
     "publish": "babel src -d dist --copy-files && webpack"
   },
   "keywords": [
-    "ac",
+    "table",
     "react",
     "rest",
     "pagination",
