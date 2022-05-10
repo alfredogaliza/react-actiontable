@@ -1,0 +1,41 @@
+.actiontable-table {
+
+}
+
+.actiontable-tools {
+
+}
+
+.actiontable-headers {
+
+}
+
+.actiontable-header {
+
+}
+
+.actiontable-header-actions {
+    text-align: center;
+    width: 1% 
+}
+
+.actiontable-rows {
+
+}
+.actiontable-row {
+
+}
+
+.actiontable-row-value {
+
+}
+
+.actiontable-row-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center ;
+}
+
+.actiontable-actionbutton {
+    margin: 2px 2px 2px 0
+}
