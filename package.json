@@ -40,6 +40,7 @@
     "react": "^18.1.0",
     "react-bootstrap": "^1.6.1",
     "react-dom": "^18.1.0",
+    "react-fenestra": "^1.0.9",
     "style-loader": "^3.3.1",
     "superagent": "^7.1.3",
     "webpack": "^5.72.0",

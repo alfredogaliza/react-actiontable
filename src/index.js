@@ -1,4 +1,4 @@
-import { faBackward, faFastBackward, faFastForward, faForward, faPlus, faSearch, faSortAlphaDown, faSortAlphaUpAlt } from "@fortawesome/free-solid-svg-icons";
+import { faBackward, faFastBackward, faFastForward, faForward, faPlus, faSearch, faSortAlphaDown, faSortAlphaUpAlt, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import Request from "superagent";
@@ -17,7 +17,7 @@ class ActionTable extends React.Component {
         endpoint: undefined,
         data: undefined,
         lang: EnUs,
-        getActionButtonComponent: (row, action) => props =>
+        getActionButtonComponent: action => props =>
             <Button {...props} title={action.title ?? action.toString()} variant='outline-primary'>
                 {action.title ?? action.toString()}
             </Button>,
@@ -37,7 +37,8 @@ class ActionTable extends React.Component {
         dir: undefined,
         filter: '',
         limit: 10,
-        offset: 0
+        offset: 0,
+        loading: false
     };
 
     componentDidMount() {
@@ -48,11 +49,11 @@ class ActionTable extends React.Component {
 
         const rows = (data.rows ?? data ?? [])
             .map(row => ({
-                columns: row.columns ?? (Array.isArray(row)? row : [row.toString()] ),
+                columns: row.columns ?? (Array.isArray(row) ? row : [row.toString()]),
                 actions: (row.actions ?? [])
             }));
 
-        const headers = (data.headers ?? new Array(Math.max(0, ...rows.map(row => row.columns.length))).fill(undefined).map((header, index) => `${lang.Column} ${index+1}`))
+        const headers = (data.headers ?? new Array(Math.max(0, ...rows.map(row => row.columns.length))).fill(undefined).map((header, index) => `${lang.Column} ${index + 1}`))
             .map(header => ({
                 title: header.title ?? header,
                 order: header.order ?? header.title ?? header
@@ -65,57 +66,64 @@ class ActionTable extends React.Component {
 
     update() {
 
-        if (this.props.endpoint) {
+        this.setState({ loading: true }, () => {
 
-            const method = this.props.endpoint.method ?? `get`;
+            if (this.props.endpoint) {
 
-            const url = this.props.endpoint.url ?? this.props.endpoint;
+                const method = this.props.endpoint.method ?? `get`;
 
-            const headers = this.props.getHeaders();
+                const url = this.props.endpoint.url ?? this.props.endpoint;
 
-            const format = method === 'get' ? 'query' : 'send';
+                const headers = this.props.getHeaders();
 
-            const params = this.props.mapStateToParams({
-                filter: this.state.filter,
-                limit: this.state.limit,
-                offset: this.state.limit ? this.state.offset : 0,
-                order: this.state.order,
-                dir: this.state.dir
-            });
+                const format = method === 'get' ? 'query' : 'send';
 
-            Request[method](url).set(headers)[format](params)
-                .then(response => {
-                    const data = ActionTable.normalize(this.props.mapResponseToData(response), this.props.lang);
-                    this.setState(() => ({ data }), () => this.props.onUpdate(this.state.data));
-                })
-                .catch(err => this.props.onError(err));
+                const params = this.props.mapStateToParams({
+                    filter: this.state.filter,
+                    limit: this.state.limit,
+                    offset: this.state.limit ? this.state.offset : 0,
+                    order: this.state.order,
+                    dir: this.state.dir
+                });
 
-        } else {
+                Request[method](url).set(headers)[format](params)
+                    .then(response => {
+                        const data = ActionTable.normalize(this.props.mapResponseToData(response), this.props.lang);
+                        this.setState(() => ({ data }), () => this.props.onUpdate(this.state.data));
+                    })
+                    .catch(err => this.props.onError(err))
+                    .finally(() => this.setState({loading: false}));
 
-            const data = ActionTable.normalize(this.props.data, this.props.lang);
+            } else {
 
-            this.setState(state => {
-                const filters = state.filter.split(" ");
-                const rows = data.rows
-                    .filter(row => filters.every(filter => row.columns.some(column => column.toString().includes(filter))))
-                    .sort((rowA, rowB) => {
-                        const index = data.headers.findIndex(header => header.order === state.order);
-                        return index < 0 ? 0 : rowA.columns[index].toString().localeCompare(rowB.columns[index].toString()) * (state.dir === `DESC` ? -1 : 1);
-                    });
-                return {
-                    data: {
-                        headers: data.headers,
-                        rows: rows.slice(
-                            state.limit > 0 ? state.offset : undefined, 
-                            state.limit > 0 ? state.offset + state.limit : undefined
-                        ),
-                        count: rows.length
+                const data = ActionTable.normalize(this.props.data, this.props.lang);
+
+                this.setState(state => {
+                    const filters = state.filter.split(" ");
+                    const rows = data.rows
+                        .filter(row => filters.every(filter => row.columns.some(column => column.toString().includes(filter))))
+                        .sort((rowA, rowB) => {
+                            const index = data.headers.findIndex(header => header.order === state.order);
+                            return index < 0 ? 0 : rowA.columns[index].toString().localeCompare(rowB.columns[index].toString()) * (state.dir === `DESC` ? -1 : 1);
+                        });
+                    return {
+                        data: {
+                            headers: data.headers,
+                            rows: rows.slice(
+                                state.limit > 0 ? state.offset : undefined,
+                                state.limit > 0 ? state.offset + state.limit : undefined
+                            ),
+                            count: rows.length
+                        }
                     }
-                }
 
-            }, () => this.props.onUpdate(this.state.data));
+                }, () => {
+                    this.props.onUpdate(this.state.data);
+                    this.setState({loading: false});
+                });
 
-        }
+            }
+        });
 
     }
 
@@ -175,11 +183,11 @@ class ActionTable extends React.Component {
             )
         };
 
-        const rows = data.rows.map((row, key) => {
+        const rows = !this.state.loading? data.rows.map((row, key) => {
 
             const actions = row.actions.map((action, key) => {
                 const ActionButton = this.props.getActionButtonComponent(action);
-                return <ActionButton key={key} className="actiontable-actionbutton" onClick={() => this.props.onAction(row, action, () => this.update())} />;
+                return <ActionButton key={key} className="actiontable-actionbutton" onClick={() => this.props.onAction(action, () => this.update())} />;
             });
 
             const cols = row.columns.map(
@@ -194,7 +202,15 @@ class ActionTable extends React.Component {
 
             return <tr key={key} className="actiontable-row">{cols}</tr>;
 
-        });
+        }) : [
+            <tr>
+                <td colSpan={headers.length} className="bg-light text-center">
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                    &nbsp;
+                    {this.props.lang.Loading}
+                </td>
+            </tr>
+        ];
 
         const pages = data.count > 0 && this.state.limit > 0 ? parseInt((data.count - 1) / this.state.limit) + 1 : 1;
 
@@ -317,8 +333,8 @@ class ActionTable extends React.Component {
     }
 }
 
-export {EnUs as EnUs};
-export {PtBr as PtBr};
+export { EnUs as EnUs };
+export { PtBr as PtBr };
 
 ActionTable.EnUs = EnUs;
 ActionTable.PtBr = PtBr;
