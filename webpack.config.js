@@ -25,8 +25,7 @@ module.exports = {
     },
     plugins: [new HtmlWebpackPlugin({
         template: "./test/index.html"
-    })],
-    mode: 'development',
+    })],    
     devServer: {
         static: path.resolve(__dirname, 'public'),
     },

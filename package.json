@@ -1,13 +1,13 @@
 {
   "name": "react-actiontable",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React component for table data visualization. Supports searching, pagination, limit per page, and async fetch. Based on Bootstrap 4, Superagent, and FontAwesome",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve",
+    "start": "webpack serve --mode development",
     "build": "babel src -d dist --copy-files",
-    "publish": "babel src -d dist --copy-files && webpack"
+    "publish": "babel src -d dist --copy-files && webpack --mode production --optimization-minimize"
   },
   "keywords": [
     "table",

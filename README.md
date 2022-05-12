@@ -55,14 +55,13 @@ Renderiza uma tabela para visualização e controle dos dados.
 | endpoint.url | String | endpoint | Endereço da fonte de dados |
 | endpoint.method | String | "get" | Método de busca HTTP dos dados |
 |lang | Object | ActiveTable.EnUs | Strings da interface |
-|getHeaders | Function | () => null | Obtém os parâmetros do cabeçalho para requição dos dados do endpoint |
-| mapStateToParams | Function | state => state | Obtém os parâmetros da query para busca dos dados na fonte remota |
+|getHeaders | Function | () => null | Obtém os parâmetros do cabeçalho para requição dos dados do endpoint. Útil quando é necessária a autenticação via JWT |
+| mapStateToParams | Function | ({limit = 0, offset = 0, filter = '', order = '', dir = 'ASC\|DESC'}) => reqParams | Obtém os parâmetros da query para busca dos dados na fonte remota |
 | mapResponseToData | Function | response => response.body | Obtém o mapeamento da resposta do endpoint para formação do objeto _data_ |
 | onError | Function | error => undefined | Callback chamado em caso de erro na busca dos dados |
-| onAction | Function | (row, action, update) => undefined | Callback chamado no momento do acionamento da Ação. O parâmetro _update_ pode ser chamado assincronamente para atualização dos dados da tabela |
+| onAction | Function | (action, update) => undefined | Callback chamado no momento do acionamento da Ação. O parâmetro _update_ pode ser chamado assincronamente para atualização dos dados da tabela |
 | onUpdate | Function | data => undefined | Callback chamado quando a tabela é atualizada |
-| onNewRecordClick | Function | (event, update) => undefined | Se configurada, habilita o botão de criação de novo registro. O usuário deverá realizar a inclusão dos dados (no backend ou frontend) e então chamar assincronamente a função _update_ para atualização dos dados |
-| getActionButtonComponent | Function | action => props => <Button {...props} \/> | Retorna um componente que será instanciado no momento da renderização com as propriedades necessárias para seu funcionamento |
+| onNewRecordClick | Function | (update) => undefined | Se configurado, habilita o botão de criação de novo registro. O usuário deverá realizar a inclusão dos dados (no backend ou frontend) e então chamar assincronamente a função _update_ para atualização dos dados da tabela|
 | toolsPosition | String | "top" \| "bottom" \| "both" \| "none", Padrão: "top" | Configura a exibição da barra de filtro, limite, paginação e inclusão de registros |
 
 # Exemplos

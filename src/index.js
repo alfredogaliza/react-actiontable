@@ -12,20 +12,13 @@ class ActionTable extends React.Component {
         getHeaders: () => ({}),
         mapStateToParams: state => state,
         mapResponseToData: ({ body }) => body,
-        onError: error => console.error(error),
-        onUpdate: data => console.info(data),
+        onError: error => undefined,
+        onUpdate: data => undefined,
         endpoint: undefined,
         data: undefined,
         lang: EnUs,
-        getActionButtonComponent: action => props =>
-            <Button {...props} title={action.title ?? action.toString()} variant='outline-primary'>
-                {action.title ?? action.toString()}
-            </Button>,
         onNewRecordClick: null,
-        onAction: (row, action, update) => {
-            console.log(row, action);
-            update();
-        },
+        onAction: (action, update) => undefined,
         toolsPosition: 'top'
     }
 
@@ -92,7 +85,7 @@ class ActionTable extends React.Component {
                         this.setState(() => ({ data }), () => this.props.onUpdate(this.state.data));
                     })
                     .catch(err => this.props.onError(err))
-                    .finally(() => this.setState({loading: false}));
+                    .finally(() => this.setState({ loading: false }));
 
             } else {
 
@@ -119,7 +112,7 @@ class ActionTable extends React.Component {
 
                 }, () => {
                     this.props.onUpdate(this.state.data);
-                    this.setState({loading: false});
+                    this.setState({ loading: false });
                 });
 
             }
@@ -183,11 +176,18 @@ class ActionTable extends React.Component {
             )
         };
 
-        const rows = !this.state.loading? data.rows.map((row, key) => {
+        const rows = !this.state.loading ? data.rows.map((row, key) => {
 
             const actions = row.actions.map((action, key) => {
-                const ActionButton = this.props.getActionButtonComponent(action);
-                return <ActionButton key={key} className="actiontable-actionbutton" onClick={() => this.props.onAction(action, () => this.update())} />;
+                return <Button
+                    key={key}
+                    className="actiontable-actionbutton"
+                    onClick={() => this.props.onAction(action, () => this.update())}
+                    title={action.title ?? action.toString()}
+                    variant='outline-primary'
+                >
+                    {action.title ?? action.toString()}
+                </Button>;
             });
 
             const cols = row.columns.map(
@@ -244,69 +244,66 @@ class ActionTable extends React.Component {
         }
 
         const tools =
-            <tr className="d-print-none actiontable-tools">
-                <td colSpan={headers.length}>
-                    <Form as="div" className="d-flex align-items-stretch flex-wrap">
-                        {this.props.onNewRecordClick &&
-                            <div className="mr-2 my-2">
-                                <Button size="sm" variant='outline-success' onClick={event => this.props.onNewRecordClick(event, () => this.update())}>
-                                    <FontAwesomeIcon icon={faPlus} />&nbsp;{this.props.lang.NewRecord}
-                                </Button>
-                            </div>
-                        }
-                        <div className="mr-2 my-2 flex-grow-1">
-                            <InputGroup size="sm">
-                                <InputGroup.Prepend >
-                                    <InputGroup.Text variant="primary">
-                                        <FontAwesomeIcon icon={faSearch} />
-                                    </InputGroup.Text>
-                                </InputGroup.Prepend>
-                                <Form.Control
-                                    type="text"
-                                    placeholder={this.props.lang.Search}
-                                    onChange={(event) => this.setFilter(event)}
-                                    value={this.state.filter}
-                                />
-                            </InputGroup>
-                        </div>
-                        <div className="small mr-2 my-2 d-flex align-items-center">
-                            <div><strong>{this.props.lang.Total}:</strong>&nbsp;{data.count} {data.count === 1 ? this.props.lang.record : this.props.lang.records}.</div>
-                        </div>
-                        <div className="mr-2 my-2">
-                            <FormControl
-                                size="sm"
-                                value={data.limit}
-                                onChange={(event) => this.setLimit(event.target.value)}
-                                as="select"
-                            >
-                                <option value={10}>10 {this.props.lang.records}</option>
-                                <option value={20}>20 {this.props.lang.records}</option>
-                                <option value={50}>50 {this.props.lang.records}</option>
-                                <option value={100}>100 {this.props.lang.records}</option>
-                                <option value={0}>{this.props.lang.AllRecords}</option>
-                            </FormControl>
-                        </div>
-                        <div>
-                            <Pagination size="sm" className="my-2">
-                                <Pagination.Item onClick={() => this.setPage(1)} disabled={page === 1} title={this.props.lang.First}>
-                                    <FontAwesomeIcon icon={faFastBackward} />
-                                </Pagination.Item>
-                                <Pagination.Item onClick={() => this.setPage(page - 1)} disabled={page === 1} title={this.props.lang.Previous}>
-                                    <FontAwesomeIcon icon={faBackward} />
-                                </Pagination.Item>
-                                {buttons}
-                                <Pagination.Item onClick={() => this.setPage(page + 1)} disabled={page === pages} title={this.props.lang.Next}>
-                                    <FontAwesomeIcon icon={faForward} />
-                                </Pagination.Item>
-                                <Pagination.Item onClick={() => this.setPage(pages)} disabled={page === pages} title={this.props.lang.Last}>
-                                    <FontAwesomeIcon icon={faFastForward} />
-                                </Pagination.Item>
-                            </Pagination>
-                        </div>
-                    </Form>
-                </td>
-            </tr>
-            ;
+            <Form as="div" className="d-flex flex-wrap align-items-center">
+                {this.props.onNewRecordClick &&
+                    <div className="mr-2 my-2 flex-grow-1">
+                        <Button size="sm" className="w-100" variant='outline-success' onClick={() => this.props.onNewRecordClick(() => this.update())}>
+                            <FontAwesomeIcon icon={faPlus} />&nbsp;{this.props.lang.NewRecord}
+                        </Button>
+                    </div>
+                }
+                <div class="flex-grow-1 d-flex align-items-center">
+                    <div className="mr-2 my-2 flex-grow-1">
+                        <InputGroup size="sm">
+                            <InputGroup.Prepend >
+                                <InputGroup.Text variant="primary">
+                                    <FontAwesomeIcon icon={faSearch} />
+                                </InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <Form.Control
+                                type="text"
+                                placeholder={this.props.lang.Search}
+                                onChange={(event) => this.setFilter(event)}
+                                value={this.state.filter}
+                            />
+                        </InputGroup>
+                    </div>
+                    <div className="small mr-2 my-2 d-flex align-items-center text-nowrap">
+                        <strong>{this.props.lang.Total}:</strong>&nbsp;{data.count} {data.count === 1 ? this.props.lang.record : this.props.lang.records}.
+                    </div>
+                </div>
+                <div className="small mr-2 my-2 d-flex align-items-center flex-grow-1">
+                    <div className="mr-2 my-2 flex-grow-1">
+                        <FormControl
+                            size="sm"
+                            value={data.limit}
+                            onChange={(event) => this.setLimit(event.target.value)}
+                            as="select"
+                        >
+                            <option value={10}>10 {this.props.lang.records}</option>
+                            <option value={20}>20 {this.props.lang.records}</option>
+                            <option value={50}>50 {this.props.lang.records}</option>
+                            <option value={100}>100 {this.props.lang.records}</option>
+                            <option value={0}>{this.props.lang.AllRecords}</option>
+                        </FormControl>
+                    </div>
+                    <Pagination size="sm" className="my-2">
+                        <Pagination.Item onClick={() => this.setPage(1)} disabled={page === 1} title={this.props.lang.First}>
+                            <FontAwesomeIcon icon={faFastBackward} />
+                        </Pagination.Item>
+                        <Pagination.Item onClick={() => this.setPage(page - 1)} disabled={page === 1} title={this.props.lang.Previous}>
+                            <FontAwesomeIcon icon={faBackward} />
+                        </Pagination.Item>
+                        {buttons}
+                        <Pagination.Item onClick={() => this.setPage(page + 1)} disabled={page === pages} title={this.props.lang.Next}>
+                            <FontAwesomeIcon icon={faForward} />
+                        </Pagination.Item>
+                        <Pagination.Item onClick={() => this.setPage(pages)} disabled={page === pages} title={this.props.lang.Last}>
+                            <FontAwesomeIcon icon={faFastForward} />
+                        </Pagination.Item>
+                    </Pagination>
+                </div>
+            </Form>;
 
         const body = rows.length > 0 ? rows :
             <tr className="actiontable-rows">
@@ -317,18 +314,18 @@ class ActionTable extends React.Component {
             ;
 
         return (
-            <Table responsive className="actiontable-table" size="sm" hover>
-                <thead>
-                    {(this.props.toolsPosition === 'top' || this.props.toolsPosition === 'both') && tools}
-                    <tr className="bg-light actiontable-headers">{headers}</tr>
-                </thead>
-                <tbody className="actiontable-rows">
-                    {body}
-                </tbody>
-                <tfoot>
-                    {(this.props.toolsPosition === 'bottom' || this.props.toolsPosition === 'both') && tools}
-                </tfoot>
-            </Table>
+            <>
+                {(this.props.toolsPosition === 'top' || this.props.toolsPosition === 'both') && tools}
+                <Table responsive className="actiontable-table" size="sm" hover>
+                    <thead>
+                        <tr className="bg-light actiontable-headers">{headers}</tr>
+                    </thead>
+                    <tbody className="actiontable-rows">
+                        {body}
+                    </tbody>
+                </Table>
+                {(this.props.toolsPosition === 'bottom' || this.props.toolsPosition === 'both') && tools}
+            </>
         );
     }
 }

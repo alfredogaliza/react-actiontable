@@ -11,5 +11,6 @@ export default {
   record: "registro",
   records: "registros",
   AllRecords: "Todos os registros",
-  NoRecordsFound: "Nenhum registro encontrado"
+  NoRecordsFound: "Nenhum registro encontrado",
+  Loading: "Carregando ..."
 };

@@ -10,7 +10,7 @@ import "react-fenestra/dist/css/fenestra.css";
 import "../src/css/actiontable.css";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPlus, faWindowRestore } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faWindowRestore } from '@fortawesome/free-solid-svg-icons';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -22,25 +22,25 @@ const newRecord = () => ({
     faker.random.word()
   ],
   actions: [
-    "Edit"
+    {title: "Editar", params: {id: faker.random.numeric(), url: faker.internet.url(), desc: "Parâmetros personalizados"}},
+    {title: "Excluir", params: {id: faker.random.numeric(), url: faker.internet.url(), desc: "Parâmetros personalizados"}}
   ]
 });
 
 const data = {
-  headers: ["Name", "Email", "Address", "Status"],
+  //headers: ["Name", "Email", "Address", "Status"],
   rows: new Array(500).fill(undefined).map(newRecord)
 }
 
-const Table = (props) =>
+const Table = ({data, endpoint}) =>
   <ActionTable
-    {...props}
     lang={PtBr}
+    data={data}
+    endpoint={endpoint}
     onAction={action => {
-      console.log(action, props);
-      props.fenestra.open({title: "Editor de Registro", content: () => <h2>Formulário de Registro</h2>});
+      window.alert("Ação executada: " + JSON.stringify(action));
     }}
-    onNewRecordClick={(event, update) => {
-      console.log(event);
+    onNewRecordClick={update => {
       data.rows.push(newRecord());
       update();
     }} />
@@ -49,12 +49,12 @@ const icons = [
   ({fenestra}) => <Icon title="Conteúdo Estático" icon={<FontAwesomeIcon icon={faWindowRestore} size="3x" />} onClick={() => fenestra.open({
       title: "Conteúdo Estático",
       width: 960, height: 600,
-      content: ({fenestra}) => <><h1>Lista de Exemplo com fonte local</h1><Table fenestra={fenestra} data={data}/></>
+      content: () => <><h1>Lista de Exemplo com fonte local</h1><Table data={data}/></>
     })} />,
     ({fenestra}) => <Icon title="Conteúdo Dinâmico" icon={<FontAwesomeIcon icon={faWindowRestore} size="3x" />} onClick={() => fenestra.open({
       title: "Conteúdo Dinâmico",
       width: 960, height: 600,
-      content: props => <><h1>Lista de Exemplo com fonte remota</h1><Table endpoint="http://actiontable.free.beeceptor.com"/></>
+      content: () => <Table endpoint="http://actiontable.free.beeceptor.com"/>
     })} />
 ]
 

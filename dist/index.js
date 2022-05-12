@@ -8,24 +8,21 @@ import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstruct
 import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
 import _defineProperty from "@babel/runtime/helpers/defineProperty";
 
-var _FontAwesomeIcon, _FontAwesomeIcon2, _FontAwesomeIcon3, _InputGroup$Prepend, _FontAwesomeIcon4, _FontAwesomeIcon5, _FontAwesomeIcon6, _FontAwesomeIcon7;
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var _FontAwesomeIcon, _FontAwesomeIcon2, _FontAwesomeIcon3, _FontAwesomeIcon4, _InputGroup$Prepend, _FontAwesomeIcon5, _FontAwesomeIcon6, _FontAwesomeIcon7, _FontAwesomeIcon8;
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-import { faBackward, faFastBackward, faFastForward, faForward, faPlus, faSearch, faSortAlphaDown, faSortAlphaUpAlt } from "@fortawesome/free-solid-svg-icons";
+import { faBackward, faFastBackward, faFastForward, faForward, faPlus, faSearch, faSortAlphaDown, faSortAlphaUpAlt, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import Request from "superagent";
 import { Button, Form, FormControl, InputGroup, Pagination, Table } from "react-bootstrap";
 import EnUs from "./lang/EnUs";
 import PtBr from "./lang/PtBr";
-import { jsx as _jsx2 } from "react/jsx-runtime";
+import { Fragment as _Fragment } from "react/jsx-runtime";
+import { jsxs as _jsxs } from "react/jsx-runtime";
 
 var ActionTable = /*#__PURE__*/function (_React$Component) {
   _inherits(ActionTable, _React$Component);
@@ -51,7 +48,8 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
       dir: undefined,
       filter: '',
       limit: 10,
-      offset: 0
+      offset: 0,
+      loading: false
     });
 
     return _this;
@@ -67,60 +65,77 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
     value: function update() {
       var _this2 = this;
 
-      if (this.props.endpoint) {
-        var _this$props$endpoint$, _this$props$endpoint$2;
+      this.setState({
+        loading: true
+      }, function () {
+        if (_this2.props.endpoint) {
+          var _this2$props$endpoint, _this2$props$endpoint2;
 
-        var method = (_this$props$endpoint$ = this.props.endpoint.method) !== null && _this$props$endpoint$ !== void 0 ? _this$props$endpoint$ : "get";
-        var url = (_this$props$endpoint$2 = this.props.endpoint.url) !== null && _this$props$endpoint$2 !== void 0 ? _this$props$endpoint$2 : this.props.endpoint;
-        var headers = this.props.getHeaders();
-        var format = method === 'get' ? 'query' : 'send';
-        var params = this.props.mapStateToParams({
-          filter: this.state.filter,
-          limit: this.state.limit,
-          offset: this.state.limit ? this.state.offset : 0,
-          order: this.state.order,
-          dir: this.state.dir
-        });
-        Request[method](url).set(headers)[format](params).then(function (response) {
-          var data = ActionTable.normalize(_this2.props.mapResponseToData(response), _this2.props.lang);
+          var method = (_this2$props$endpoint = _this2.props.endpoint.method) !== null && _this2$props$endpoint !== void 0 ? _this2$props$endpoint : "get";
+          var url = (_this2$props$endpoint2 = _this2.props.endpoint.url) !== null && _this2$props$endpoint2 !== void 0 ? _this2$props$endpoint2 : _this2.props.endpoint;
 
-          _this2.setState(function () {
+          var headers = _this2.props.getHeaders();
+
+          var format = method === 'get' ? 'query' : 'send';
+
+          var params = _this2.props.mapStateToParams({
+            filter: _this2.state.filter,
+            limit: _this2.state.limit,
+            offset: _this2.state.limit ? _this2.state.offset : 0,
+            order: _this2.state.order,
+            dir: _this2.state.dir
+          });
+
+          Request[method](url).set(headers)[format](params).then(function (response) {
+            var data = ActionTable.normalize(_this2.props.mapResponseToData(response), _this2.props.lang);
+
+            _this2.setState(function () {
+              return {
+                data: data
+              };
+            }, function () {
+              return _this2.props.onUpdate(_this2.state.data);
+            });
+          })["catch"](function (err) {
+            return _this2.props.onError(err);
+          })["finally"](function () {
+            return _this2.setState({
+              loading: false
+            });
+          });
+        } else {
+          var data = ActionTable.normalize(_this2.props.data, _this2.props.lang);
+
+          _this2.setState(function (state) {
+            var filters = state.filter.split(" ");
+            var rows = data.rows.filter(function (row) {
+              return filters.every(function (filter) {
+                return row.columns.some(function (column) {
+                  return column.toString().includes(filter);
+                });
+              });
+            }).sort(function (rowA, rowB) {
+              var index = data.headers.findIndex(function (header) {
+                return header.order === state.order;
+              });
+              return index < 0 ? 0 : rowA.columns[index].toString().localeCompare(rowB.columns[index].toString()) * (state.dir === "DESC" ? -1 : 1);
+            });
             return {
-              data: data
+              data: {
+                headers: data.headers,
+                rows: rows.slice(state.limit > 0 ? state.offset : undefined, state.limit > 0 ? state.offset + state.limit : undefined),
+                count: rows.length
+              }
             };
           }, function () {
-            return _this2.props.onUpdate(_this2.state.data);
-          });
-        })["catch"](function (err) {
-          return _this2.props.onError(err);
-        });
-      } else {
-        var data = ActionTable.normalize(this.props.data, this.props.lang);
-        this.setState(function (state) {
-          var filters = state.filter.split(" ");
-          var rows = data.rows.filter(function (row) {
-            return filters.every(function (filter) {
-              return row.columns.some(function (column) {
-                return column.toString().includes(filter);
-              });
+            _this2.props.onUpdate(_this2.state.data);
+
+            _this2.setState({
+              loading: false
             });
-          }).sort(function (rowA, rowB) {
-            var index = data.headers.findIndex(function (header) {
-              return header.order === state.order;
-            });
-            return index < 0 ? 0 : rowA.columns[index].toString().localeCompare(rowB.columns[index].toString()) * (state.dir === "DESC" ? -1 : 1);
           });
-          return {
-            data: {
-              headers: data.headers,
-              rows: rows.slice(state.limit > 0 ? state.offset : undefined, state.limit > 0 ? state.offset + state.limit : undefined),
-              count: rows.length
-            }
-          };
-        }, function () {
-          return _this2.props.onUpdate(_this2.state.data);
-        });
-      }
+        }
+      });
     }
   }, {
     key: "setOrder",
@@ -231,18 +246,20 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
       }
 
       ;
-      var rows = data.rows.map(function (row, key) {
+      var rows = !this.state.loading ? data.rows.map(function (row, key) {
         var actions = row.actions.map(function (action, key) {
-          var ActionButton = _this7.props.getActionButtonComponent(action);
+          var _action$title, _action$title2;
 
-          return /*#__PURE__*/_jsx(ActionButton, {
+          return /*#__PURE__*/_jsx(Button, {
             className: "actiontable-actionbutton",
             onClick: function onClick() {
-              return _this7.props.onAction(row, action, function () {
+              return _this7.props.onAction(action, function () {
                 return _this7.update();
               });
-            }
-          }, key);
+            },
+            title: (_action$title = action.title) !== null && _action$title !== void 0 ? _action$title : action.toString(),
+            variant: "outline-primary"
+          }, key, (_action$title2 = action.title) !== null && _action$title2 !== void 0 ? _action$title2 : action.toString());
         });
         var cols = row.columns.map(function (column, key) {
           return /*#__PURE__*/_jsx("td", {
@@ -255,7 +272,13 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         return /*#__PURE__*/_jsx("tr", {
           className: "actiontable-row"
         }, key, cols);
-      });
+      }) : [/*#__PURE__*/_jsx("tr", {}, void 0, /*#__PURE__*/_jsx("td", {
+        colSpan: headers.length,
+        className: "bg-light text-center"
+      }, void 0, _FontAwesomeIcon3 || (_FontAwesomeIcon3 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+        icon: faSpinner,
+        spin: true
+      })), "\xA0", this.props.lang.Loading))];
       var pages = data.count > 0 && this.state.limit > 0 ? parseInt((data.count - 1) / this.state.limit) + 1 : 1;
       var page = this.state.limit > 0 ? parseInt(this.state.offset / this.state.limit) + 1 : 1;
       var max = 5;
@@ -289,26 +312,25 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         _loop(p);
       }
 
-      var tools = /*#__PURE__*/_jsx("tr", {
-        className: "d-print-none actiontable-tools"
-      }, void 0, /*#__PURE__*/_jsx("td", {
-        colSpan: headers.length
-      }, void 0, /*#__PURE__*/_jsx(Form, {
+      var tools = /*#__PURE__*/_jsx(Form, {
         as: "div",
-        className: "d-flex align-items-stretch flex-wrap"
+        className: "d-flex flex-wrap align-items-center"
       }, void 0, this.props.onNewRecordClick && /*#__PURE__*/_jsx("div", {
-        className: "mr-2 my-2"
+        className: "mr-2 my-2 flex-grow-1"
       }, void 0, /*#__PURE__*/_jsx(Button, {
         size: "sm",
+        className: "w-100",
         variant: "outline-success",
-        onClick: function onClick(event) {
-          return _this7.props.onNewRecordClick(event, function () {
+        onClick: function onClick() {
+          return _this7.props.onNewRecordClick(function () {
             return _this7.update();
           });
         }
-      }, void 0, _FontAwesomeIcon3 || (_FontAwesomeIcon3 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+      }, void 0, _FontAwesomeIcon4 || (_FontAwesomeIcon4 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
         icon: faPlus
       })), "\xA0", this.props.lang.NewRecord)), /*#__PURE__*/_jsx("div", {
+        "class": "flex-grow-1 d-flex align-items-center"
+      }, void 0, /*#__PURE__*/_jsx("div", {
         className: "mr-2 my-2 flex-grow-1"
       }, void 0, /*#__PURE__*/_jsx(InputGroup, {
         size: "sm"
@@ -324,9 +346,11 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         },
         value: this.state.filter
       }))), /*#__PURE__*/_jsx("div", {
-        className: "small mr-2 my-2 d-flex align-items-center"
-      }, void 0, /*#__PURE__*/_jsx("div", {}, void 0, /*#__PURE__*/_jsx("strong", {}, void 0, this.props.lang.Total, ":"), "\xA0", data.count, " ", data.count === 1 ? this.props.lang.record : this.props.lang.records, ".")), /*#__PURE__*/_jsx("div", {
-        className: "mr-2 my-2"
+        className: "small mr-2 my-2 d-flex align-items-center text-nowrap"
+      }, void 0, /*#__PURE__*/_jsx("strong", {}, void 0, this.props.lang.Total, ":"), "\xA0", data.count, " ", data.count === 1 ? this.props.lang.record : this.props.lang.records, ".")), /*#__PURE__*/_jsx("div", {
+        className: "small mr-2 my-2 d-flex align-items-center flex-grow-1"
+      }, void 0, /*#__PURE__*/_jsx("div", {
+        className: "mr-2 my-2 flex-grow-1"
       }, void 0, /*#__PURE__*/_jsx(FormControl, {
         size: "sm",
         value: data.limit,
@@ -344,7 +368,7 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         value: 100
       }, void 0, "100 ", this.props.lang.records), /*#__PURE__*/_jsx("option", {
         value: 0
-      }, void 0, this.props.lang.AllRecords))), /*#__PURE__*/_jsx("div", {}, void 0, /*#__PURE__*/_jsx(Pagination, {
+      }, void 0, this.props.lang.AllRecords))), /*#__PURE__*/_jsx(Pagination, {
         size: "sm",
         className: "my-2"
       }, void 0, /*#__PURE__*/_jsx(Pagination.Item, {
@@ -353,7 +377,7 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         },
         disabled: page === 1,
         title: this.props.lang.First
-      }, void 0, _FontAwesomeIcon4 || (_FontAwesomeIcon4 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+      }, void 0, _FontAwesomeIcon5 || (_FontAwesomeIcon5 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
         icon: faFastBackward
       }))), /*#__PURE__*/_jsx(Pagination.Item, {
         onClick: function onClick() {
@@ -361,7 +385,7 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         },
         disabled: page === 1,
         title: this.props.lang.Previous
-      }, void 0, _FontAwesomeIcon5 || (_FontAwesomeIcon5 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+      }, void 0, _FontAwesomeIcon6 || (_FontAwesomeIcon6 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
         icon: faBackward
       }))), buttons, /*#__PURE__*/_jsx(Pagination.Item, {
         onClick: function onClick() {
@@ -369,7 +393,7 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         },
         disabled: page === pages,
         title: this.props.lang.Next
-      }, void 0, _FontAwesomeIcon6 || (_FontAwesomeIcon6 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+      }, void 0, _FontAwesomeIcon7 || (_FontAwesomeIcon7 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
         icon: faForward
       }))), /*#__PURE__*/_jsx(Pagination.Item, {
         onClick: function onClick() {
@@ -377,9 +401,9 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         },
         disabled: page === pages,
         title: this.props.lang.Last
-      }, void 0, _FontAwesomeIcon7 || (_FontAwesomeIcon7 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
+      }, void 0, _FontAwesomeIcon8 || (_FontAwesomeIcon8 = /*#__PURE__*/_jsx(FontAwesomeIcon, {
         icon: faFastForward
-      }))))))));
+      }))))));
 
       var body = rows.length > 0 ? rows : /*#__PURE__*/_jsx("tr", {
         className: "actiontable-rows"
@@ -387,16 +411,18 @@ var ActionTable = /*#__PURE__*/function (_React$Component) {
         colSpan: headers.length,
         className: "text-center my-5"
       }, void 0, /*#__PURE__*/_jsx("strong", {}, void 0, this.props.lang.NoRecordsFound)));
-      return /*#__PURE__*/_jsx(Table, {
-        responsive: true,
-        className: "actiontable-table",
-        size: "sm",
-        hover: true
-      }, void 0, /*#__PURE__*/_jsx("thead", {}, void 0, (this.props.toolsPosition === 'top' || this.props.toolsPosition === 'both') && tools, /*#__PURE__*/_jsx("tr", {
-        className: "bg-light actiontable-headers"
-      }, void 0, headers)), /*#__PURE__*/_jsx("tbody", {
-        className: "actiontable-rows"
-      }, void 0, body), /*#__PURE__*/_jsx("tfoot", {}, void 0, (this.props.toolsPosition === 'bottom' || this.props.toolsPosition === 'both') && tools));
+      return /*#__PURE__*/_jsxs(_Fragment, {
+        children: [(this.props.toolsPosition === 'top' || this.props.toolsPosition === 'both') && tools, /*#__PURE__*/_jsx(Table, {
+          responsive: true,
+          className: "actiontable-table",
+          size: "sm",
+          hover: true
+        }, void 0, /*#__PURE__*/_jsx("thead", {}, void 0, /*#__PURE__*/_jsx("tr", {
+          className: "bg-light actiontable-headers"
+        }, void 0, headers)), /*#__PURE__*/_jsx("tbody", {
+          className: "actiontable-rows"
+        }, void 0, body)), (this.props.toolsPosition === 'bottom' || this.props.toolsPosition === 'both') && tools]
+      });
     }
   }]);
 
@@ -415,29 +441,17 @@ _defineProperty(ActionTable, "defaultProps", {
     return body;
   },
   onError: function onError(error) {
-    return console.error(error);
+    return undefined;
   },
   onUpdate: function onUpdate(data) {
-    return console.info(data);
+    return undefined;
   },
   endpoint: undefined,
   data: undefined,
   lang: EnUs,
-  getActionButtonComponent: function getActionButtonComponent(row, action) {
-    return function (props) {
-      var _action$title, _action$title2;
-
-      return /*#__PURE__*/_jsx2(Button, _objectSpread(_objectSpread({}, props), {}, {
-        title: (_action$title = action.title) !== null && _action$title !== void 0 ? _action$title : action.toString(),
-        variant: "outline-primary",
-        children: (_action$title2 = action.title) !== null && _action$title2 !== void 0 ? _action$title2 : action.toString()
-      }));
-    };
-  },
   onNewRecordClick: null,
-  onAction: function onAction(row, action, update) {
-    console.log(row, action);
-    update();
+  onAction: function onAction(action, update) {
+    return undefined;
   },
   toolsPosition: 'top'
 });

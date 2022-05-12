@@ -11,5 +11,6 @@ export default {
   record: "record",
   records: "records",
   AllRecords: "All records",
-  NoRecordsFound: "No records found"
+  NoRecordsFound: "No records found",
+  Loading: "Loading ..."
 };
